@@ -1,0 +1,235 @@
+--Library management system
+
+CREATE DATABASE librarydb;
+USE librarydb;
+
+CREATE TABLE members (
+    member_id INT PRIMARY KEY,
+    member_name VARCHAR(50),
+    member_type VARCHAR(20)
+);
+
+CREATE TABLE books (
+    book_id INT PRIMARY KEY,
+    title VARCHAR(100),
+    category VARCHAR(50),
+    total_copies INT,
+    available_copies INT
+);
+
+CREATE TABLE issues (
+    issue_id INT PRIMARY KEY,
+    member_id INT,
+    book_id INT,
+    issue_date DATE,
+    due_date DATE,
+    return_date DATE,
+    fine DECIMAL(10,2),
+    FOREIGN KEY (member_id) REFERENCES members(member_id),
+    FOREIGN KEY (book_id) REFERENCES books(book_id)
+);
+
+-- inserting members
+
+INSERT INTO members VALUES
+(1,'Aarav','Student'),
+(2,'Priya','Student'),
+(3,'Rahul','Student'),
+(4,'Sneha','Student'),
+(5,'Kiran','Student'),
+(6,'Ananya','Student'),
+(7,'Rohit','Student'),
+(8,'Meera','Student'),
+(9,'Arjun','Faculty'),
+(10,'Divya','Faculty'),
+(11,'Vikram','Faculty'),
+(12,'Neha','Faculty');
+
+-- inserting books
+
+INSERT INTO books VALUES
+(101,'Python Programming','Programming',5,3),
+(102,'Java Basics','Programming',4,2),
+(103,'C Programming','Programming',3,1),
+(104,'Database Systems','Database',4,2),
+(105,'SQL Fundamentals','Database',3,0),
+(106,'Computer Networks','Networking',3,1),
+(107,'Operating Systems','Computer Science',4,2),
+(108,'Data Structures','Computer Science',5,3),
+(109,'Artificial Intelligence','Technology',3,1),
+(110,'Machine Learning','Technology',2,0),
+(111,'Wings of Fire','Biography',4,2),
+(112,'The Alchemist','Fiction',3,1),
+(113,'Rich Dad Poor Dad','Finance',3,2),
+(114,'Digital Electronics','Electronics',2,1),
+(115,'Web Development','Programming',4,2);
+
+-- inserting issue records
+
+INSERT INTO issues VALUES
+(1,1,101,'2026-01-01','2026-01-10','2026-01-09',0),
+(2,2,102,'2026-01-02','2026-01-12','2026-01-15',15),
+(3,3,103,'2026-01-03','2026-01-13','2026-01-13',0),
+(4,4,104,'2026-01-04','2026-01-14',NULL,0),
+(5,5,105,'2026-01-05','2026-01-15',NULL,0),
+(6,6,106,'2026-01-06','2026-01-16','2026-01-20',20),
+(7,7,107,'2026-01-07','2026-01-17','2026-01-16',0),
+(8,8,108,'2026-01-08','2026-01-18',NULL,0),
+(9,9,109,'2026-01-09','2026-01-19','2026-01-22',15),
+(10,10,110,'2026-01-10','2026-01-20',NULL,0),
+(11,1,111,'2026-01-11','2026-01-21','2026-01-21',0),
+(12,2,112,'2026-01-12','2026-01-22','2026-01-25',15),
+(13,3,113,'2026-01-13','2026-01-23','2026-01-23',0),
+(14,4,114,'2026-01-14','2026-01-24',NULL,0),
+(15,5,115,'2026-01-15','2026-01-25','2026-01-28',15),
+(16,6,101,'2026-01-16','2026-01-26','2026-01-26',0),
+(17,7,102,'2026-01-17','2026-01-27','2026-01-30',15),
+(18,8,103,'2026-01-18','2026-01-28','2026-01-27',0),
+(19,9,104,'2026-01-19','2026-01-29',NULL,0),
+(20,10,105,'2026-01-20','2026-01-30',NULL,0),
+(21,1,106,'2026-01-21','2026-01-31','2026-02-03',15),
+(22,2,107,'2026-01-22','2026-02-01','2026-01-31',0),
+(23,3,108,'2026-01-23','2026-02-02',NULL,0),
+(24,4,109,'2026-01-24','2026-02-03','2026-02-06',15),
+(25,5,110,'2026-01-25','2026-02-04',NULL,0),
+(26,6,111,'2026-01-26','2026-02-05','2026-02-05',0),
+(27,7,112,'2026-01-27','2026-02-06','2026-02-09',15),
+(28,8,113,'2026-01-28','2026-02-07','2026-02-07',0),
+(29,9,114,'2026-01-29','2026-02-08',NULL,0),
+(30,10,115,'2026-01-30','2026-02-09','2026-02-12',15),
+(31,11,101,'2026-02-01','2026-02-11','2026-02-11',0),
+(32,12,102,'2026-02-02','2026-02-12',NULL,0);
+
+
+-- C2
+
+SELECT COUNT(*) FROM members;
+SELECT COUNT(*) FROM books;
+SELECT COUNT(*) FROM issues;
+
+
+-- C3
+
+SELECT category, COUNT(*) AS total_titles,
+SUM(available_copies) AS available_copies
+FROM books
+GROUP BY category;
+
+
+-- C4
+
+SELECT b.title, COUNT(*) AS borrow_count
+FROM issues i
+JOIN books b ON i.book_id = b.book_id
+GROUP BY b.book_id, b.title
+ORDER BY borrow_count DESC
+LIMIT 5;
+
+
+-- C5
+
+SELECT m.member_name
+FROM members m
+LEFT JOIN issues i ON m.member_id = i.member_id
+WHERE i.member_id IS NULL;
+
+
+-- C6
+
+SELECT m.member_name, b.title, i.due_date
+FROM issues i
+JOIN members m ON i.member_id = m.member_id
+JOIN books b ON i.book_id = b.book_id
+WHERE i.return_date IS NULL;
+
+
+-- C7
+
+SELECT issue_id, member_id, book_id,
+DATEDIFF(return_date, due_date) AS late_days,
+DATEDIFF(return_date, due_date) * 5 AS fine
+FROM issues
+WHERE return_date > due_date;
+
+
+-- C8
+
+SELECT member_id, SUM(fine) AS total_fine
+FROM issues
+GROUP BY member_id;
+
+
+-- C9
+
+SELECT m.member_type, COUNT(*) AS total_borrowed
+FROM members m
+JOIN issues i ON m.member_id = i.member_id
+GROUP BY m.member_type;
+
+
+-- C10
+
+SELECT m.member_name,
+COUNT(i.issue_id) AS total_books,
+RANK() OVER (ORDER BY COUNT(i.issue_id) DESC) AS member_rank
+FROM members m
+LEFT JOIN issues i ON m.member_id = i.member_id
+GROUP BY m.member_id, m.member_name;
+
+
+-- C11
+
+SELECT b.category, COUNT(*) AS total_borrowed
+FROM books b
+JOIN issues i ON b.book_id = i.book_id
+GROUP BY b.category
+ORDER BY total_borrowed DESC
+LIMIT 1;
+
+
+-- C12
+
+SELECT DISTINCT b.title, b.available_copies
+FROM books b
+JOIN issues i ON b.book_id = i.book_id
+WHERE b.available_copies = 0
+AND i.return_date IS NULL;
+
+
+-- C13
+
+DELIMITER //
+
+CREATE PROCEDURE MemberHistory(IN mid INT)
+BEGIN
+    SELECT *
+    FROM issues
+    WHERE member_id = mid;
+END //
+
+DELIMITER ;
+
+CALL MemberHistory(1);
+
+
+-- C14
+
+DELIMITER //
+
+CREATE TRIGGER reduce_copies
+AFTER INSERT ON issues
+FOR EACH ROW
+BEGIN
+    UPDATE books
+    SET available_copies = available_copies - 1
+    WHERE book_id = NEW.book_id;
+END //
+
+DELIMITER ;
+
+
+-- checking records
+
+SELECT COUNT(*) FROM members;
+SELECT COUNT(*) FROM books;
+SELECT COUNT(*) FROM issues;
